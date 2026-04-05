@@ -1,0 +1,23 @@
+{
+  "name": "@atrox/api",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@atrox/db": "workspace:*",
+    "@atrox/types": "workspace:*",
+    "@atrox/agent": "workspace:*",
+    "hono": "^4.7.0",
+    "stripe": "^17.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "vitest": "^3.1.0",
+    "typescript": "^5.7.0"
+  }
+}
