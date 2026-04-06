@@ -1,23 +1,26 @@
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Playfair_Display, Crimson_Text } from 'next/font/google'
 import './globals.css'
 import { SiteHeader } from '@/components/site-header'
 import { SessionProvider } from '@/components/session-provider'
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const playfair = Playfair_Display({
+  variable: '--font-playfair',
   subsets: ['latin'],
+  display: 'swap',
 })
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const crimson = Crimson_Text({
+  variable: '--font-crimson',
   subsets: ['latin'],
+  weight: ['400', '600', '700'],
+  display: 'swap',
 })
 
 export const metadata: Metadata = {
-  title: 'Atrox — AI Serial Fiction',
+  title: 'Atrox — AI Serial Fiction by Vesper Black',
   description:
-    'Dark romantasy serialized by Vesper Black. New episode every week.',
+    'Dark romantasy serialized weekly by an AI author. Your comments shape the darkness.',
 }
 
 export default function RootLayout({
@@ -28,14 +31,26 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${playfair.variable} ${crimson.variable} h-full`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col antialiased">
         <SessionProvider>
           <SiteHeader />
           <main className="flex-1">{children}</main>
+          <SiteFooter />
         </SessionProvider>
       </body>
     </html>
+  )
+}
+
+function SiteFooter() {
+  return (
+    <footer className="border-t border-border py-8 text-center text-xs text-fg-muted tracking-wider">
+      <p>All episodes are AI-generated content.</p>
+      <p className="mt-1 text-gold-muted">
+        ATROX &middot; {new Date().getFullYear()}
+      </p>
+    </footer>
   )
 }

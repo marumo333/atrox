@@ -7,14 +7,14 @@ export function AuthButton() {
   const { data: session, status } = useSession()
 
   if (status === 'loading') {
-    return <span className="text-sm text-muted-foreground">...</span>
+    return <span className="text-xs text-fg-muted tracking-widest">...</span>
   }
 
   if (session?.user) {
     return (
       <button
         onClick={() => signOut({ callbackUrl: '/' })}
-        className="rounded border border-muted px-4 py-1.5 text-sm hover:border-muted-foreground"
+        className="text-xs tracking-widest text-fg-muted hover:text-fg transition-colors uppercase"
       >
         Sign Out
       </button>
@@ -24,9 +24,9 @@ export function AuthButton() {
   return (
     <Link
       href="/login"
-      className="rounded bg-accent px-4 py-1.5 text-sm text-foreground hover:bg-accent-light"
+      className="border border-gold/40 px-4 py-1.5 text-xs tracking-widest text-gold hover:bg-gold/10 hover:border-gold transition-all uppercase"
     >
-      Sign In
+      Enter
     </Link>
   )
 }

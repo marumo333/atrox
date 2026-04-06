@@ -11,12 +11,12 @@ export default function LoginPage() {
 
 function LoginSkeleton() {
   return (
-    <div className="mx-auto max-w-sm px-6 py-24">
-      <h1 className="mb-8 text-center text-2xl font-bold">Sign In</h1>
-      <div className="space-y-4">
-        <div className="h-10 rounded bg-muted" />
-        <div className="h-10 rounded bg-muted" />
-        <div className="h-10 rounded bg-muted" />
+    <div className="mx-auto max-w-sm px-6 py-28">
+      <div className="h-8 w-32 mx-auto bg-bg-elevated mb-10" />
+      <div className="space-y-5">
+        <div className="h-11 bg-bg-elevated border border-border" />
+        <div className="h-11 bg-bg-elevated border border-border" />
+        <div className="h-11 bg-bg-elevated border border-border" />
       </div>
     </div>
   )

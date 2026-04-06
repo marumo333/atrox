@@ -8,7 +8,6 @@ export function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const rawCallback = searchParams.get('callbackUrl') ?? '/episodes'
-  // Prevent open redirect — only allow relative paths
   const callbackUrl = rawCallback.startsWith('/') ? rawCallback : '/episodes'
 
   const [email, setEmail] = useState('')
@@ -21,7 +20,6 @@ export function LoginForm() {
     e.preventDefault()
     setError('')
     setLoading(true)
-
     try {
       if (isRegistering) {
         await handleRegister()
@@ -41,12 +39,10 @@ export function LoginForm() {
       password,
       redirect: false,
     })
-
     if (result?.error) {
       setError('Invalid email or password.')
       return
     }
-
     router.push(callbackUrl)
   }
 
@@ -56,66 +52,48 @@ export function LoginForm() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     })
-
     if (!res.ok) {
       const data = (await res.json()) as { error: string }
       setError(data.error)
       return
     }
-
     await handleSignIn()
   }
 
   return (
-    <div className="mx-auto max-w-sm px-6 py-24">
-      <h1 className="mb-8 text-center text-2xl font-bold">
+    <div className="mx-auto max-w-sm px-6 py-28 animate-fade-up">
+      <h1 className="font-display text-2xl text-center mb-10 tracking-tight">
         {isRegistering ? 'Create Account' : 'Sign In'}
       </h1>
 
       {error && (
-        <p className="mb-4 rounded bg-accent/20 p-3 text-sm text-accent-light">
+        <p className="mb-6 border border-accent/30 bg-accent/5 p-3 text-sm text-accent">
           {error}
         </p>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="mb-1 block text-sm">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full rounded border border-muted bg-background px-3 py-2 text-foreground focus:border-accent-light focus:outline-none"
-          />
-        </div>
-        <div>
-          <label htmlFor="password" className="mb-1 block text-sm">
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={8}
-            className="w-full rounded border border-muted bg-background px-3 py-2 text-foreground focus:border-accent-light focus:outline-none"
-          />
-        </div>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <Field
+          id="email"
+          label="Email"
+          type="email"
+          value={email}
+          onChange={setEmail}
+        />
+        <Field
+          id="password"
+          label="Password"
+          type="password"
+          value={password}
+          onChange={setPassword}
+          minLength={8}
+        />
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded bg-accent py-2 font-medium hover:bg-accent-light disabled:opacity-50"
+          className="w-full bg-accent py-3 text-xs uppercase tracking-widest text-fg hover:bg-accent-hover transition-colors disabled:opacity-50"
         >
-          {loading
-            ? 'Loading...'
-            : isRegistering
-              ? 'Create Account'
-              : 'Sign In'}
+          {loading ? '...' : isRegistering ? 'Create Account' : 'Sign In'}
         </button>
       </form>
 
@@ -125,12 +103,48 @@ export function LoginForm() {
           setIsRegistering(!isRegistering)
           setError('')
         }}
-        className="mt-4 block w-full text-center text-sm text-muted-foreground hover:text-foreground"
+        className="mt-6 block w-full text-center text-xs text-fg-muted tracking-wider hover:text-fg transition-colors"
       >
         {isRegistering
           ? 'Already have an account? Sign in'
           : "Don't have an account? Create one"}
       </button>
+    </div>
+  )
+}
+
+function Field({
+  id,
+  label,
+  type,
+  value,
+  onChange,
+  minLength,
+}: {
+  id: string
+  label: string
+  type: string
+  value: string
+  onChange: (v: string) => void
+  minLength?: number
+}) {
+  return (
+    <div>
+      <label
+        htmlFor={id}
+        className="block text-xs tracking-widest text-fg-muted uppercase mb-2"
+      >
+        {label}
+      </label>
+      <input
+        id={id}
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        required
+        minLength={minLength}
+        className="w-full border border-border bg-bg-elevated px-4 py-3 text-fg placeholder:text-fg-muted/40 focus:border-gold/40 focus:outline-none transition-colors"
+      />
     </div>
   )
 }

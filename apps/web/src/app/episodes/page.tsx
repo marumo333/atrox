@@ -30,42 +30,53 @@ const PLACEHOLDER_EPISODES: Episode[] = [
 
 export default function EpisodesPage() {
   return (
-    <div className="mx-auto max-w-2xl px-6 py-16">
-      <h1 className="mb-2 text-3xl font-bold">Episodes</h1>
-      <p className="mb-10 text-muted-foreground">
-        New episode every Monday. Pro members read 3 days early.
-      </p>
-      <ul className="space-y-4">
-        {PLACEHOLDER_EPISODES.map((ep) => (
-          <EpisodeCard key={ep.episodeNumber} episode={ep} />
+    <div className="mx-auto max-w-2xl px-6 py-20">
+      <header className="mb-14 animate-fade-up">
+        <p className="text-xs uppercase tracking-[0.3em] text-gold-muted mb-3">
+          Arc I
+        </p>
+        <h1 className="font-display text-4xl tracking-tight">Episodes</h1>
+        <p className="mt-3 text-fg-muted leading-relaxed">
+          New episode every Monday. Pro members read three days early.
+        </p>
+      </header>
+
+      <ul className="space-y-1">
+        {PLACEHOLDER_EPISODES.map((ep, i) => (
+          <li
+            key={ep.episodeNumber}
+            className={`animate-fade-up stagger-${i + 1}`}
+          >
+            <EpisodeRow episode={ep} />
+          </li>
         ))}
       </ul>
     </div>
   )
 }
 
-function EpisodeCard({ episode }: { episode: Episode }) {
+function EpisodeRow({ episode }: { episode: Episode }) {
   return (
-    <li>
-      <Link
-        href={`/episodes/${episode.episodeNumber}`}
-        className="flex items-center justify-between rounded border border-muted p-4 hover:border-muted-foreground"
-      >
-        <div>
-          <span className="text-sm text-muted-foreground">
-            Episode {episode.episodeNumber}
+    <Link
+      href={`/episodes/${episode.episodeNumber}`}
+      className="group flex items-baseline justify-between border-b border-border py-5 hover:border-border-hover transition-colors"
+    >
+      <div className="flex items-baseline gap-4">
+        <span className="text-xs text-fg-muted tabular-nums w-6">
+          {String(episode.episodeNumber).padStart(2, '0')}
+        </span>
+        <h2 className="font-display text-lg group-hover:text-gold transition-colors">
+          {episode.title}
+        </h2>
+        {episode.tier === 'pro' && (
+          <span className="text-[10px] uppercase tracking-widest text-accent border border-accent/30 px-1.5 py-0.5">
+            Pro
           </span>
-          <h2 className="text-lg font-medium">{episode.title}</h2>
-        </div>
-        <div className="flex items-center gap-3">
-          {episode.tier === 'pro' && (
-            <span className="rounded bg-accent px-2 py-0.5 text-xs">PRO</span>
-          )}
-          <span className="text-sm text-muted-foreground">
-            {episode.publishedAt}
-          </span>
-        </div>
-      </Link>
-    </li>
+        )}
+      </div>
+      <time className="text-xs text-fg-muted tracking-wider">
+        {episode.publishedAt}
+      </time>
+    </Link>
   )
 }
