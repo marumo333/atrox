@@ -28,15 +28,15 @@ export function extractEntities(
 export function appendStyleNote(
   current: StyleDriftEntry[],
   _episodeBody: string,
-  episodeNumber: number,
 ): StyleDriftEntry[] {
+  const episodeNumber = current.length + 1
   return [...current, { episodeNumber, note: 'auto-generated style note' }]
 }
 
 export function appendEmotionalNote(
   current: EmotionalLogEntry[],
-  episodeNumber: number,
 ): EmotionalLogEntry[] {
+  const episodeNumber = current.length + 1
   return [
     ...current,
     {

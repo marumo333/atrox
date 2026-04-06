@@ -10,15 +10,18 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@atrox/agent": "workspace:*",
     "@atrox/db": "workspace:*",
     "@atrox/types": "workspace:*",
-    "@atrox/agent": "workspace:*",
+    "@neondatabase/serverless": "^0.10.0",
+    "drizzle-orm": "^0.38.0",
     "hono": "^4.7.0",
+    "jose": "^6.2.2",
     "stripe": "^17.0.0"
   },
   "devDependencies": {
     "tsx": "^4.19.0",
-    "vitest": "^3.1.0",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vitest": "^3.1.0"
   }
 }

@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
+import { secureHeaders } from 'hono/secure-headers'
 import { episodesRouter } from './routes/episodes'
 import { commentsRouter } from './routes/comments'
 import { billingRouter } from './routes/billing'
@@ -8,7 +9,15 @@ import { charactersRouter } from './routes/characters'
 
 export const app = new Hono()
 
-app.use('*', cors())
+app.use(
+  '*',
+  cors({
+    origin: process.env.NEXT_PUBLIC_URL ?? 'http://localhost:3000',
+    credentials: true,
+  }),
+)
+
+app.use('*', secureHeaders())
 
 app.get('/health', (c) => c.json({ status: 'ok' }))
 

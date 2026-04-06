@@ -19,23 +19,30 @@ import { getTopComments } from '@atrox/db'
 import type { ArcStateData, WorldState, RecurringEntities } from '@atrox/types'
 import { eq } from 'drizzle-orm'
 
+interface CharacterInfo {
+  personaPrompt: string
+  styleRules: string
+}
+
+type GetCharacter = (arcId: string) => Promise<CharacterInfo>
+
 export async function runGenerationJob(
   db: DbClient,
-  getCharacter: (arcId: string) => Promise<{
-    personaPrompt: string
-    styleRules: string
-  }>,
+  getCharacter: GetCharacter,
 ): Promise<{ generated: boolean }> {
   const job = await getPendingJob(db)
   if (!job) return { generated: false }
 
-  await updateJobStatus(db, job.id, 'running')
+  const jobId = (job as { id: string }).id
+  const arcId = (job as { arcId: string }).arcId
+
+  await updateJobStatus(db, jobId, 'running')
 
   try {
-    const state = await getArcStateByArcId(db, job.arcId)
-    if (!state) throw new Error(`No arc_state for arc ${job.arcId}`)
+    const state = await getArcStateByArcId(db, arcId)
+    if (!state) throw new Error(`No arc_state for arc ${arcId}`)
 
-    const character = await getCharacter(job.arcId)
+    const character = await getCharacter(arcId)
     const stateData = toArcStateData(state)
     const recentComments = await getTopComments(db, [], 5)
 
@@ -47,23 +54,26 @@ export async function runGenerationJob(
     })
 
     const episodeBody = await generateEpisodeText(prompt)
-    const newEpNumber = stateData.episodeCount + 1
 
+    // Single transaction: episode insert + arc_state update
     await saveEpisodeAndUpdateState(
       db,
-      job.arcId,
+      arcId,
       episodeBody,
-      newEpNumber,
+      stateData.episodeCount + 1,
       stateData,
     )
 
-    await updateJobStatus(db, job.id, 'done')
-    await enqueueNextJob(db, job.arcId, nextMonday())
+    // Single transaction: mark done + enqueue next
+    await db.transaction(async (tx) => {
+      await updateJobStatus(tx as unknown as DbClient, jobId, 'done')
+      await enqueueNextJob(tx as unknown as DbClient, arcId, nextMonday())
+    })
 
     return { generated: true }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
-    await updateJobStatus(db, job.id, 'failed', message)
+    await updateJobStatus(db, jobId, 'failed', message)
     throw err
   }
 }
@@ -100,8 +110,8 @@ async function saveEpisodeAndUpdateState(
         episodeCount: episodeNumber,
         worldState: mergeWorldState(current.worldState, body),
         recurringEntities: extractEntities(body, current.recurringEntities),
-        styleDrift: appendStyleNote(current.styleDrift, body, episodeNumber),
-        emotionalLog: appendEmotionalNote(current.emotionalLog, episodeNumber),
+        styleDrift: appendStyleNote(current.styleDrift, body),
+        emotionalLog: appendEmotionalNote(current.emotionalLog),
         updatedAt: new Date(),
       })
       .where(eq(arcState.arcId, arcId))

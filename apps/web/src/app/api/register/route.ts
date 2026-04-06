@@ -7,11 +7,17 @@ export async function POST(request: Request) {
     password?: string
   }
 
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
   if (!body.email || !body.password) {
     return NextResponse.json(
       { error: 'Email and password are required' },
       { status: 400 },
     )
+  }
+
+  if (!EMAIL_REGEX.test(body.email)) {
+    return NextResponse.json({ error: 'Invalid email format' }, { status: 400 })
   }
 
   if (body.password.length < 8) {

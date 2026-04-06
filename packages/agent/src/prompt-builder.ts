@@ -1,15 +1,17 @@
 import type { PromptInput } from '@atrox/types'
+import { sanitizeComments } from './prompt-sanitizer'
 
 const SECTION_SEPARATOR = '\n\n---\n\n'
 
 export function buildPrompt(input: PromptInput): string {
+  const safeComments = sanitizeComments(input.topComments)
   return [
     input.character.personaPrompt,
     input.character.styleRules,
     buildWorldStateSection(input),
     buildEntitiesSection(input),
     buildStyleDriftSection(input),
-    buildReaderInputSection(input),
+    buildReaderInputSection(safeComments),
     buildGenerationInstruction(input.episodeNumber),
   ].join(SECTION_SEPARATOR)
 }
@@ -26,8 +28,8 @@ function buildStyleDriftSection(input: PromptInput): string {
   return `## Style Evolution\n${JSON.stringify(input.arcState.styleDrift)}`
 }
 
-function buildReaderInputSection(input: PromptInput): string {
-  const bodies = input.topComments.map((c) => c.body).join('\n')
+function buildReaderInputSection(comments: { body: string }[]): string {
+  const bodies = comments.map((c) => c.body).join('\n')
   return `## Reader Input This Week\n${bodies}`
 }
 

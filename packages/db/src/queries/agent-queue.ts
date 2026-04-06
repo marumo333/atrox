@@ -1,16 +1,18 @@
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import type { DbClient } from '../client'
 import { agentQueue } from '../schema/index'
 import type { QueueStatus } from '@atrox/types'
 
 export async function getPendingJob(db: DbClient) {
-  const [job] = await db
-    .select()
-    .from(agentQueue)
-    .where(eq(agentQueue.status, 'pending'))
-    .limit(1)
+  const result = await db.execute(
+    sql`SELECT * FROM agent_queue
+        WHERE status = 'pending'
+        LIMIT 1
+        FOR UPDATE SKIP LOCKED`,
+  )
 
-  return job ?? null
+  const row = result.rows[0]
+  return row ?? null
 }
 
 export async function updateJobStatus(
