@@ -1,5 +1,6 @@
 import { neon } from '@neondatabase/serverless'
 import { drizzle } from 'drizzle-orm/neon-http'
+import type { NeonHttpDatabase } from 'drizzle-orm/neon-http'
 import * as schema from './schema/index'
 
 function getDatabaseUrl(): string {
@@ -8,6 +9,21 @@ function getDatabaseUrl(): string {
   return url
 }
 
-const sql = neon(getDatabaseUrl())
-export const db = drizzle(sql, { schema })
-export type DbClient = typeof db
+let _db: NeonHttpDatabase<typeof schema> | null = null
+
+export function getDb(): NeonHttpDatabase<typeof schema> {
+  if (!_db) {
+    const sql = neon(getDatabaseUrl())
+    _db = drizzle(sql, { schema })
+  }
+  return _db
+}
+
+// Lazy proxy — db is only connected on first property access
+export const db = new Proxy({} as NeonHttpDatabase<typeof schema>, {
+  get(_, prop) {
+    return Reflect.get(getDb(), prop)
+  },
+})
+
+export type DbClient = NeonHttpDatabase<typeof schema>
