@@ -30,10 +30,7 @@ export function appendStyleNote(
   _episodeBody: string,
   episodeNumber: number,
 ): StyleDriftEntry[] {
-  return [
-    ...current,
-    { episodeNumber, note: 'auto-generated style note' },
-  ]
+  return [...current, { episodeNumber, note: 'auto-generated style note' }]
 }
 
 export function appendEmotionalNote(

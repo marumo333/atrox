@@ -15,9 +15,7 @@ function getClient(): Anthropic {
   return clientInstance
 }
 
-export async function generateEpisodeText(
-  prompt: string,
-): Promise<string> {
+export async function generateEpisodeText(prompt: string): Promise<string> {
   const client = getClient()
 
   const message = await client.messages.create({

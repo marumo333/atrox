@@ -50,7 +50,11 @@ export async function runGenerationJob(
     const newEpNumber = stateData.episodeCount + 1
 
     await saveEpisodeAndUpdateState(
-      db, job.arcId, episodeBody, newEpNumber, stateData,
+      db,
+      job.arcId,
+      episodeBody,
+      newEpNumber,
+      stateData,
     )
 
     await updateJobStatus(db, job.id, 'done')

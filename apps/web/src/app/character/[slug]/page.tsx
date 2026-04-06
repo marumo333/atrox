@@ -1,9 +1,9 @@
 interface CharacterPageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string }>
 }
 
 export default async function CharacterPage({ params }: CharacterPageProps) {
-  const { slug } = await params;
+  const { slug } = await params
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-16">
@@ -40,9 +40,9 @@ export default async function CharacterPage({ params }: CharacterPageProps) {
           Arc 1 — A world with political structure, old magic, and older debts.
         </p>
         <p className="mt-2 text-sm text-muted-foreground">
-          New episode every Monday. {slug && ""}
+          New episode every Monday. {slug && ''}
         </p>
       </div>
     </div>
-  );
+  )
 }

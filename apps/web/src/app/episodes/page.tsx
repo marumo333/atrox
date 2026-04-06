@@ -1,32 +1,32 @@
-import Link from "next/link";
+import Link from 'next/link'
 
 interface Episode {
-  episodeNumber: number;
-  title: string;
-  publishedAt: string;
-  tier: string;
+  episodeNumber: number
+  title: string
+  publishedAt: string
+  tier: string
 }
 
 const PLACEHOLDER_EPISODES: Episode[] = [
   {
     episodeNumber: 1,
-    title: "The Invitation",
-    publishedAt: "2026-04-07",
-    tier: "free",
+    title: 'The Invitation',
+    publishedAt: '2026-04-07',
+    tier: 'free',
   },
   {
     episodeNumber: 2,
-    title: "A Name Spoken in Smoke",
-    publishedAt: "2026-04-14",
-    tier: "free",
+    title: 'A Name Spoken in Smoke',
+    publishedAt: '2026-04-14',
+    tier: 'free',
   },
   {
     episodeNumber: 3,
-    title: "The Court of Thorns",
-    publishedAt: "2026-04-21",
-    tier: "pro",
+    title: 'The Court of Thorns',
+    publishedAt: '2026-04-21',
+    tier: 'pro',
   },
-];
+]
 
 export default function EpisodesPage() {
   return (
@@ -41,7 +41,7 @@ export default function EpisodesPage() {
         ))}
       </ul>
     </div>
-  );
+  )
 }
 
 function EpisodeCard({ episode }: { episode: Episode }) {
@@ -58,7 +58,7 @@ function EpisodeCard({ episode }: { episode: Episode }) {
           <h2 className="text-lg font-medium">{episode.title}</h2>
         </div>
         <div className="flex items-center gap-3">
-          {episode.tier === "pro" && (
+          {episode.tier === 'pro' && (
             <span className="rounded bg-accent px-2 py-0.5 text-xs">PRO</span>
           )}
           <span className="text-sm text-muted-foreground">
@@ -67,5 +67,5 @@ function EpisodeCard({ episode }: { episode: Episode }) {
         </div>
       </Link>
     </li>
-  );
+  )
 }

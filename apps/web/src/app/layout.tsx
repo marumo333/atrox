@@ -1,29 +1,29 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { SiteHeader } from "@/components/site-header";
-import { SessionProvider } from "@/components/session-provider";
+import type { Metadata } from 'next'
+import { Geist, Geist_Mono } from 'next/font/google'
+import './globals.css'
+import { SiteHeader } from '@/components/site-header'
+import { SessionProvider } from '@/components/session-provider'
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
+})
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
+})
 
 export const metadata: Metadata = {
-  title: "Atrox — AI Serial Fiction",
+  title: 'Atrox — AI Serial Fiction',
   description:
-    "Dark romantasy serialized by Vesper Black. New episode every week.",
-};
+    'Dark romantasy serialized by Vesper Black. New episode every week.',
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html
@@ -37,5 +37,5 @@ export default function RootLayout({
         </SessionProvider>
       </body>
     </html>
-  );
+  )
 }

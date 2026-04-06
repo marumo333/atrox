@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from 'next/link'
 
 export default function HomePage() {
   return (
@@ -33,5 +33,5 @@ export default function HomePage() {
         All episodes are AI-generated. Vesper Black is a fictional character.
       </p>
     </div>
-  );
+  )
 }

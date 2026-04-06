@@ -1,10 +1,10 @@
 interface EpisodePageProps {
-  params: Promise<{ episodeNumber: string }>;
+  params: Promise<{ episodeNumber: string }>
 }
 
 export default async function EpisodePage({ params }: EpisodePageProps) {
-  const { episodeNumber } = await params;
-  const num = Number(episodeNumber);
+  const { episodeNumber } = await params
+  const num = Number(episodeNumber)
 
   return (
     <article className="mx-auto max-w-2xl px-6 py-16">
@@ -37,5 +37,5 @@ export default async function EpisodePage({ params }: EpisodePageProps) {
         powered by Claude.
       </footer>
     </article>
-  );
+  )
 }

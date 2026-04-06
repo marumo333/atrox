@@ -1,46 +1,46 @@
-import Link from "next/link";
+import Link from 'next/link'
 
 const TIERS = [
   {
-    name: "Free",
-    price: "$0",
+    name: 'Free',
+    price: '$0',
     features: [
-      "Read all archived episodes",
-      "Mobile-first reading experience",
-      "Public comments",
+      'Read all archived episodes',
+      'Mobile-first reading experience',
+      'Public comments',
     ],
-    cta: "Start Reading",
-    href: "/episodes",
+    cta: 'Start Reading',
+    href: '/episodes',
     highlight: false,
   },
   {
-    name: "Pro",
-    price: "$8/mo",
+    name: 'Pro',
+    price: '$8/mo',
     features: [
-      "Early access (3 days before free)",
-      "Story requests and voting",
-      "Message Vesper Black",
-      "Pro badge on comments",
+      'Early access (3 days before free)',
+      'Story requests and voting',
+      'Message Vesper Black',
+      'Pro badge on comments',
     ],
-    cta: "Upgrade to Pro",
-    href: "/login",
+    cta: 'Upgrade to Pro',
+    href: '/login',
     highlight: true,
   },
   {
-    name: "Premium",
-    price: "$24/mo",
+    name: 'Premium',
+    price: '$24/mo',
     features: [
-      "Everything in Pro",
-      "Create your own character",
-      "Private weekly episodes",
-      "Style and genre customization",
-      "Persistent character memory",
+      'Everything in Pro',
+      'Create your own character',
+      'Private weekly episodes',
+      'Style and genre customization',
+      'Persistent character memory',
     ],
-    cta: "Go Premium",
-    href: "/login",
+    cta: 'Go Premium',
+    href: '/login',
     highlight: false,
   },
-] as const;
+] as const
 
 export default function PricingPage() {
   return (
@@ -55,20 +55,14 @@ export default function PricingPage() {
         ))}
       </div>
     </div>
-  );
+  )
 }
 
-function TierCard({
-  tier,
-}: {
-  tier: (typeof TIERS)[number];
-}) {
+function TierCard({ tier }: { tier: (typeof TIERS)[number] }) {
   return (
     <div
       className={`rounded border p-6 ${
-        tier.highlight
-          ? "border-accent-light bg-accent/10"
-          : "border-muted"
+        tier.highlight ? 'border-accent-light bg-accent/10' : 'border-muted'
       }`}
     >
       <h2 className="text-xl font-bold">{tier.name}</h2>
@@ -84,12 +78,12 @@ function TierCard({
         href={tier.href}
         className={`mt-6 block rounded px-4 py-2 text-center text-sm font-medium ${
           tier.highlight
-            ? "bg-accent hover:bg-accent-light"
-            : "border border-muted hover:border-muted-foreground"
+            ? 'bg-accent hover:bg-accent-light'
+            : 'border border-muted hover:border-muted-foreground'
         }`}
       >
         {tier.cta}
       </Link>
     </div>
-  );
+  )
 }

@@ -1,5 +1,5 @@
-import Link from "next/link";
-import { AuthButton } from "./auth-button";
+import Link from 'next/link'
+import { AuthButton } from './auth-button'
 
 export function SiteHeader() {
   return (
@@ -12,7 +12,10 @@ export function SiteHeader() {
           <Link href="/episodes" className="hover:text-accent-light">
             Episodes
           </Link>
-          <Link href="/character/vesper-black" className="hover:text-accent-light">
+          <Link
+            href="/character/vesper-black"
+            className="hover:text-accent-light"
+          >
             Vesper Black
           </Link>
           <Link href="/pricing" className="hover:text-accent-light">
@@ -22,5 +25,5 @@ export function SiteHeader() {
         </div>
       </nav>
     </header>
-  );
+  )
 }

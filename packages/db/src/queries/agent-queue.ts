@@ -25,9 +25,7 @@ export async function updateJobStatus(
     .set({
       status,
       ...(status === 'running' ? { startedAt: now } : {}),
-      ...(status === 'done' || status === 'failed'
-        ? { completedAt: now }
-        : {}),
+      ...(status === 'done' || status === 'failed' ? { completedAt: now } : {}),
       ...(errorLog ? { errorLog } : {}),
     })
     .where(eq(agentQueue.id, jobId))

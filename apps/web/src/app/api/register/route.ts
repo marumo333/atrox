@@ -31,8 +31,5 @@ export async function POST(request: Request) {
 
   const user = await createUser(body.email, body.password)
 
-  return NextResponse.json(
-    { id: user.id, email: user.email },
-    { status: 201 },
-  )
+  return NextResponse.json({ id: user.id, email: user.email }, { status: 201 })
 }
