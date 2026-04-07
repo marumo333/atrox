@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
@@ -12,6 +13,7 @@ export function LoginForm() {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [agreed, setAgreed] = useState(false)
   const [error, setError] = useState('')
   const [isRegistering, setIsRegistering] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -19,6 +21,12 @@ export function LoginForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
+
+    if (isRegistering && !agreed) {
+      setError('You must agree to the Terms and Privacy Policy.')
+      return
+    }
+
     setLoading(true)
     try {
       if (isRegistering) {
@@ -88,10 +96,15 @@ export function LoginForm() {
           onChange={setPassword}
           minLength={8}
         />
+
+        {isRegistering && (
+          <AgreementCheckbox checked={agreed} onChange={setAgreed} />
+        )}
+
         <button
           type="submit"
-          disabled={loading}
-          className="w-full bg-accent py-3 text-xs uppercase tracking-widest text-fg hover:bg-accent-hover transition-colors disabled:opacity-50"
+          disabled={loading || (isRegistering && !agreed)}
+          className="w-full bg-accent py-3 text-xs uppercase tracking-widest text-fg hover:bg-accent-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? '...' : isRegistering ? 'Create Account' : 'Sign In'}
         </button>
@@ -110,6 +123,45 @@ export function LoginForm() {
           : "Don't have an account? Create one"}
       </button>
     </div>
+  )
+}
+
+function AgreementCheckbox({
+  checked,
+  onChange,
+}: {
+  checked: boolean
+  onChange: (v: boolean) => void
+}) {
+  return (
+    <label className="flex items-start gap-3 text-xs text-fg-muted leading-relaxed cursor-pointer">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        required
+        className="mt-0.5 h-4 w-4 shrink-0 accent-accent cursor-pointer"
+      />
+      <span>
+        I am 18 or older and agree to the{' '}
+        <Link
+          href="/terms"
+          target="_blank"
+          className="text-gold hover:text-gold-muted underline underline-offset-2"
+        >
+          Terms of Service
+        </Link>{' '}
+        and{' '}
+        <Link
+          href="/privacy"
+          target="_blank"
+          className="text-gold hover:text-gold-muted underline underline-offset-2"
+        >
+          Privacy Policy
+        </Link>
+        .
+      </span>
+    </label>
   )
 }
 
