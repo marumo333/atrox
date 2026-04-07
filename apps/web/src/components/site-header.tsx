@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { AuthButton } from './auth-button'
+import { MobileMenu } from './mobile-menu'
 
 export function SiteHeader() {
   return (
@@ -11,7 +12,9 @@ export function SiteHeader() {
         >
           ATROX
         </Link>
-        <div className="flex items-center gap-8 text-sm tracking-wide">
+
+        {/* Desktop nav */}
+        <div className="hidden md:flex items-center gap-8 text-sm tracking-wide">
           <Link
             href="/episodes"
             className="text-fg-muted hover:text-fg transition-colors"
@@ -32,6 +35,9 @@ export function SiteHeader() {
           </Link>
           <AuthButton />
         </div>
+
+        {/* Mobile hamburger */}
+        <MobileMenu />
       </nav>
     </header>
   )
