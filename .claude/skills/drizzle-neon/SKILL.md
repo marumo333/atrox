@@ -82,9 +82,11 @@ export const episodes = pgTable('episodes', {
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
   email: text('email').notNull().unique(),
+  passwordHash: text('password_hash').notNull(), // bcrypt hash
   tier: text('tier').notNull().default('free'), // free | pro | premium
-  stripeCustomerId: text('stripe_customer_id'),
+  lemonCustomerId: text('lemon_customer_id'), // Lemon Squeezy customer ID
   subscribedAt: timestamp('subscribed_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
 })
 
 export const comments = pgTable('comments', {
@@ -102,7 +104,10 @@ export const agentQueue = pgTable('agent_queue', {
   trigger: text('trigger').notNull(), // cron_weekly | manual
   inputSnapshot: jsonb('input_snapshot'),
   status: text('status').notNull().default('pending'), // pending | running | done | failed
+  errorLog: text('error_log'), // failed時のエラー詳細
   scheduledAt: timestamp('scheduled_at').notNull(),
+  startedAt: timestamp('started_at'), // ジョブ実行開始時刻
+  completedAt: timestamp('completed_at'), // ジョブ完了/失敗時刻
 })
 
 export const premiumCharacters = pgTable('premium_characters', {
