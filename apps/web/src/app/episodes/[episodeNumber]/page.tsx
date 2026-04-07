@@ -1,5 +1,17 @@
+import type { Metadata } from 'next'
+
 interface EpisodePageProps {
   params: Promise<{ episodeNumber: string }>
+}
+
+export async function generateMetadata({
+  params,
+}: EpisodePageProps): Promise<Metadata> {
+  const { episodeNumber } = await params
+  return {
+    title: `Episode ${episodeNumber} — Atrox`,
+    description: `Episode ${episodeNumber} by Vesper Black.`,
+  }
 }
 
 export default async function EpisodePage({ params }: EpisodePageProps) {

@@ -1,9 +1,10 @@
 'use client'
 
-import Link from 'next/link'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
+import { Field } from './field'
+import { AgreementCheckbox } from './agreement-checkbox'
 
 export function LoginForm() {
   const router = useRouter()
@@ -17,29 +18,6 @@ export function LoginForm() {
   const [error, setError] = useState('')
   const [isRegistering, setIsRegistering] = useState(false)
   const [loading, setLoading] = useState(false)
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError('')
-
-    if (isRegistering && !agreed) {
-      setError('You must agree to the Terms and Privacy Policy.')
-      return
-    }
-
-    setLoading(true)
-    try {
-      if (isRegistering) {
-        await handleRegister()
-      } else {
-        await handleSignIn()
-      }
-    } catch {
-      setError('Something went wrong. Please try again.')
-    } finally {
-      setLoading(false)
-    }
-  }
 
   async function handleSignIn() {
     const result = await signIn('credentials', {
@@ -66,6 +44,29 @@ export function LoginForm() {
       return
     }
     await handleSignIn()
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setError('')
+
+    if (isRegistering && !agreed) {
+      setError('You must agree to the Terms and Privacy Policy.')
+      return
+    }
+
+    setLoading(true)
+    try {
+      if (isRegistering) {
+        await handleRegister()
+      } else {
+        await handleSignIn()
+      }
+    } catch {
+      setError('Something went wrong. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -122,81 +123,6 @@ export function LoginForm() {
           ? 'Already have an account? Sign in'
           : "Don't have an account? Create one"}
       </button>
-    </div>
-  )
-}
-
-function AgreementCheckbox({
-  checked,
-  onChange,
-}: {
-  checked: boolean
-  onChange: (v: boolean) => void
-}) {
-  return (
-    <label className="flex items-start gap-3 text-xs text-fg-muted leading-relaxed cursor-pointer">
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-        required
-        className="mt-0.5 h-4 w-4 shrink-0 accent-accent cursor-pointer"
-      />
-      <span>
-        I am 18 or older and agree to the{' '}
-        <Link
-          href="/terms"
-          target="_blank"
-          className="text-gold hover:text-gold-muted underline underline-offset-2"
-        >
-          Terms of Service
-        </Link>{' '}
-        and{' '}
-        <Link
-          href="/privacy"
-          target="_blank"
-          className="text-gold hover:text-gold-muted underline underline-offset-2"
-        >
-          Privacy Policy
-        </Link>
-        .
-      </span>
-    </label>
-  )
-}
-
-function Field({
-  id,
-  label,
-  type,
-  value,
-  onChange,
-  minLength,
-}: {
-  id: string
-  label: string
-  type: string
-  value: string
-  onChange: (v: string) => void
-  minLength?: number
-}) {
-  return (
-    <div>
-      <label
-        htmlFor={id}
-        className="block text-xs tracking-widest text-fg-muted uppercase mb-2"
-      >
-        {label}
-      </label>
-      <input
-        id={id}
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        required
-        minLength={minLength}
-        className="w-full border border-border bg-bg-elevated px-4 py-3 text-fg placeholder:text-fg-muted/40 focus:border-gold/40 focus:outline-none transition-colors"
-      />
     </div>
   )
 }

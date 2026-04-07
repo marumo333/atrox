@@ -1,4 +1,11 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'Pricing — Atrox',
+  description:
+    'Free, Pro ($8/mo), and Premium ($24/mo) tiers. Support the story, shape the darkness.',
+}
 
 const TIERS = [
   {

@@ -18,7 +18,7 @@ const REQUIRED_VARS = [
   'LEMONSQUEEZY_VARIANT_PREMIUM',
   'CRON_SECRET',
   'NEXT_PUBLIC_URL',
-] as const
+] as const satisfies readonly (keyof ApiEnv)[]
 
 let _env: ApiEnv | null = null
 
@@ -30,9 +30,11 @@ export function getEnv(): ApiEnv {
     throw new Error(`Missing env vars: ${missing.join(', ')}`)
   }
 
-  _env = Object.fromEntries(
-    REQUIRED_VARS.map((k) => [k, process.env[k]!]),
-  ) as unknown as ApiEnv
+  const result = {} as ApiEnv
+  for (const key of REQUIRED_VARS) {
+    result[key] = process.env[key]!
+  }
 
+  _env = result
   return _env
 }

@@ -1,4 +1,11 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'Episodes — Atrox',
+  description:
+    'Read all serialized episodes by Vesper Black. New episode every Monday.',
+}
 
 interface Episode {
   episodeNumber: number

@@ -1,3 +1,11 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Vesper Black — Atrox',
+  description:
+    'Meet Vesper Black, the AI author behind Atrox dark romantasy serial fiction.',
+}
+
 interface CharacterPageProps {
   params: Promise<{ slug: string }>
 }

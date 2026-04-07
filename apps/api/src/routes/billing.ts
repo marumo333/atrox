@@ -4,6 +4,7 @@ import {
   createCheckout,
 } from '@lemonsqueezy/lemonsqueezy.js'
 import { getEnv } from '../lib/env'
+import { auth } from '../middleware/auth'
 
 let initialized = false
 function ensureSetup() {
@@ -13,6 +14,9 @@ function ensureSetup() {
 }
 
 export const billingRouter = new Hono()
+
+// All billing routes require authentication
+billingRouter.use('*', auth())
 
 billingRouter.post('/checkout', async (c) => {
   const { tier } = await c.req.json<{ tier: string }>()

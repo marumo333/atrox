@@ -4,6 +4,7 @@ import {
   updateJobStatus,
   enqueueNextJob,
   getArcStateByArcId,
+  getTopComments,
 } from '@atrox/db'
 import { arcState, episodes } from '@atrox/db/schema'
 import {
@@ -15,7 +16,6 @@ import {
   appendStyleNote,
   appendEmotionalNote,
 } from '@atrox/agent'
-import { getTopComments } from '@atrox/db'
 import type { ArcStateData, WorldState, RecurringEntities } from '@atrox/types'
 import { eq } from 'drizzle-orm'
 
@@ -39,43 +39,59 @@ export async function runGenerationJob(
   await updateJobStatus(db, jobId, 'running')
 
   try {
-    const state = await getArcStateByArcId(db, arcId)
-    if (!state) throw new Error(`No arc_state for arc ${arcId}`)
-
-    const character = await getCharacter(arcId)
-    const stateData = toArcStateData(state)
-    const recentComments = await getTopComments(db, [], 5)
-
-    const prompt = buildPrompt({
-      character,
-      arcState: stateData,
-      topComments: recentComments.map((c) => ({ body: c.body })),
-      episodeNumber: stateData.episodeCount + 1,
-    })
-
-    const episodeBody = await generateEpisodeText(prompt)
-
-    // Single transaction: episode insert + arc_state update
-    await saveEpisodeAndUpdateState(
-      db,
-      arcId,
-      episodeBody,
-      stateData.episodeCount + 1,
-      stateData,
-    )
-
-    // Single transaction: mark done + enqueue next
-    await db.transaction(async (tx) => {
-      await updateJobStatus(tx as unknown as DbClient, jobId, 'done')
-      await enqueueNextJob(tx as unknown as DbClient, arcId, nextMonday())
-    })
-
+    const episodeBody = await generateEpisode(db, arcId, getCharacter)
+    await finalizeJobSuccess(db, jobId, arcId, episodeBody)
     return { generated: true }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
     await updateJobStatus(db, jobId, 'failed', message)
     throw err
   }
+}
+
+async function generateEpisode(
+  db: DbClient,
+  arcId: string,
+  getCharacter: GetCharacter,
+): Promise<string> {
+  const state = await getArcStateByArcId(db, arcId)
+  if (!state) throw new Error(`No arc_state for arc ${arcId}`)
+
+  const character = await getCharacter(arcId)
+  const stateData = toArcStateData(state)
+  const recentComments = await getTopComments(db, [], 5)
+
+  const prompt = buildPrompt({
+    character,
+    arcState: stateData,
+    topComments: recentComments.map((c) => ({ body: c.body })),
+    episodeNumber: stateData.episodeCount + 1,
+  })
+
+  const episodeBody = await generateEpisodeText(prompt)
+
+  await saveEpisodeAndUpdateState(
+    db,
+    arcId,
+    episodeBody,
+    stateData.episodeCount + 1,
+    stateData,
+  )
+
+  return episodeBody
+}
+
+async function finalizeJobSuccess(
+  db: DbClient,
+  jobId: string,
+  arcId: string,
+  _episodeBody: string,
+): Promise<void> {
+  await db.transaction(async (tx) => {
+    const txDb = tx as unknown as DbClient
+    await updateJobStatus(txDb, jobId, 'done')
+    await enqueueNextJob(txDb, arcId, nextMonday())
+  })
 }
 
 function toArcStateData(state: Record<string, unknown>): ArcStateData {
