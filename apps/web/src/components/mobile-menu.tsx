@@ -41,16 +41,21 @@ export function MobileMenu() {
         aria-label={open ? 'Close menu' : 'Open menu'}
         aria-expanded={open}
         onClick={() => setOpen(!open)}
-        className="md:hidden flex flex-col justify-center items-center w-10 h-10 -mr-2"
+        className="md:hidden relative flex h-11 w-11 items-center justify-center -mr-2 border border-gold/30 rounded hover:border-gold/60 hover:bg-gold/5 transition-colors"
       >
         <span
-          className={`block h-px w-6 bg-fg transition-all duration-300 ${
-            open ? 'rotate-45 translate-y-[3px]' : '-translate-y-1'
+          className={`absolute block h-[2.5px] w-6 bg-gold rounded-full transition-all duration-300 ${
+            open ? 'rotate-45' : '-translate-y-[7px]'
           }`}
         />
         <span
-          className={`block h-px w-6 bg-fg transition-all duration-300 ${
-            open ? '-rotate-45 -translate-y-px' : 'translate-y-1'
+          className={`absolute block h-[2.5px] w-6 bg-gold rounded-full transition-all duration-200 ${
+            open ? 'opacity-0 scale-0' : 'opacity-100'
+          }`}
+        />
+        <span
+          className={`absolute block h-[2.5px] w-6 bg-gold rounded-full transition-all duration-300 ${
+            open ? '-rotate-45' : 'translate-y-[7px]'
           }`}
         />
       </button>
