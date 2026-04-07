@@ -1,8 +1,6 @@
 import NextAuth from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import { authConfig } from './auth-config'
-import { verifyPassword } from './password'
-import { findUserByEmail } from './user-service'
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
@@ -17,6 +15,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const password = credentials?.password as string | undefined
 
         if (!email || !password) return null
+
+        // Dynamic imports to avoid DB connection at module load time
+        const { findUserByEmail } = await import('./user-service')
+        const { verifyPassword } = await import('./password')
 
         const user = await findUserByEmail(email)
         if (!user) return null
