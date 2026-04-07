@@ -13,11 +13,11 @@
     "@atrox/agent": "workspace:*",
     "@atrox/db": "workspace:*",
     "@atrox/types": "workspace:*",
+    "@lemonsqueezy/lemonsqueezy.js": "^4.0.0",
     "@neondatabase/serverless": "^0.10.0",
     "drizzle-orm": "^0.38.0",
     "hono": "^4.7.0",
-    "jose": "^6.2.2",
-    "stripe": "^17.0.0"
+    "jose": "^6.2.2"
   },
   "devDependencies": {
     "tsx": "^4.19.0",

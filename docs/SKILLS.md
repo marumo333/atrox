@@ -11,7 +11,7 @@
 |------|-----------|
 | エージェントループ・arc_state・agent_queue | .claude/skills/agent-loop/SKILL.md |
 | DBスキーマ・Drizzle・Neon接続 | .claude/skills/drizzle-neon/SKILL.md |
-| Stripe・tier管理・Webhook | .claude/skills/stripe-tier/SKILL.md |
+| Lemon Squeezy・tier管理・Webhook | .claude/skills/lemon-tier/SKILL.md |
 
 ---
 

@@ -1,9 +1,15 @@
 import { Hono } from 'hono'
-import Stripe from 'stripe'
+import {
+  lemonSqueezySetup,
+  createCheckout,
+} from '@lemonsqueezy/lemonsqueezy.js'
 import { getEnv } from '../lib/env'
 
-function getStripe(): Stripe {
-  return new Stripe(getEnv().STRIPE_SECRET_KEY)
+let initialized = false
+function ensureSetup() {
+  if (initialized) return
+  lemonSqueezySetup({ apiKey: getEnv().LEMONSQUEEZY_API_KEY })
+  initialized = true
 }
 
 export const billingRouter = new Hono()
@@ -15,20 +21,32 @@ billingRouter.post('/checkout', async (c) => {
     return c.json({ error: 'Invalid tier' }, 400)
   }
 
+  ensureSetup()
   const env = getEnv()
-  const priceId =
-    tier === 'premium' ? env.STRIPE_PREMIUM_PRICE_ID : env.STRIPE_PRO_PRICE_ID
+  const variantId =
+    tier === 'premium'
+      ? env.LEMONSQUEEZY_VARIANT_PREMIUM
+      : env.LEMONSQUEEZY_VARIANT_PRO
 
   const userId = c.get('userId' as never) as string
-  const stripe = getStripe()
 
-  const session = await stripe.checkout.sessions.create({
-    mode: 'subscription',
-    line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${env.NEXT_PUBLIC_URL}/dashboard?upgraded=true`,
-    cancel_url: `${env.NEXT_PUBLIC_URL}/pricing`,
-    metadata: { userId },
-  })
+  const { data, error } = await createCheckout(
+    env.LEMONSQUEEZY_STORE_ID,
+    variantId,
+    {
+      checkoutData: {
+        custom: { user_id: userId },
+      },
+      productOptions: {
+        redirectUrl: `${env.NEXT_PUBLIC_URL}/dashboard?upgraded=true`,
+        receiptButtonText: 'Return to Atrox',
+      },
+    },
+  )
 
-  return c.json({ url: session.url })
+  if (error || !data) {
+    return c.json({ error: 'Failed to create checkout' }, 500)
+  }
+
+  return c.json({ url: data.data.attributes.url })
 })
