@@ -17,6 +17,7 @@ import {
   extractEntities,
   appendStyleNote,
   appendEmotionalNote,
+  parseEpisode,
 } from '@atrox/agent'
 import type { ArcStateData, WorldState, RecurringEntities } from '@atrox/types'
 import { eq } from 'drizzle-orm'
@@ -145,16 +146,20 @@ function toArcStateData(state: Record<string, unknown>): ArcStateData {
 async function saveEpisodeAndUpdateState(
   db: DbClient,
   arcId: string,
-  body: string,
+  rawBody: string,
   episodeNumber: number,
   current: ArcStateData,
 ): Promise<void> {
+  // Extract title from Claude output and strip header
+  const parsed = parseEpisode(rawBody)
+
   // Neon HTTP has no transactions — use db.batch for atomic multi-statement
   await db.batch([
     db.insert(episodes).values({
       arcId,
       episodeNumber,
-      body,
+      title: parsed.title,
+      body: parsed.body,
       tier: 'pro',
       publishedAt: new Date(),
     }),
@@ -162,9 +167,12 @@ async function saveEpisodeAndUpdateState(
       .update(arcState)
       .set({
         episodeCount: episodeNumber,
-        worldState: mergeWorldState(current.worldState, body),
-        recurringEntities: extractEntities(body, current.recurringEntities),
-        styleDrift: appendStyleNote(current.styleDrift, body),
+        worldState: mergeWorldState(current.worldState, parsed.body),
+        recurringEntities: extractEntities(
+          parsed.body,
+          current.recurringEntities,
+        ),
+        styleDrift: appendStyleNote(current.styleDrift, parsed.body),
         emotionalLog: appendEmotionalNote(current.emotionalLog),
         updatedAt: new Date(),
       })

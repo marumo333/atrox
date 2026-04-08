@@ -8,6 +8,7 @@ import {
   getEffectiveTier,
 } from '@atrox/db'
 import { getCurrentTier } from '@/lib/current-tier'
+import { EpisodeBody } from '@/components/episode-body'
 import { TIER_ORDER } from '@atrox/types'
 
 interface EpisodePageProps {
@@ -67,19 +68,8 @@ export default async function EpisodePage({ params }: EpisodePageProps) {
         </div>
       </header>
 
-      <div className="animate-fade-up stagger-2 space-y-6 text-lg leading-[1.9] text-fg/90">
-        {episode.body.split('\n\n').map((paragraph, i) => (
-          <p
-            key={i}
-            className={
-              i === 0
-                ? 'first-letter:text-5xl first-letter:font-display first-letter:text-gold first-letter:float-left first-letter:mr-2 first-letter:mt-1'
-                : ''
-            }
-          >
-            {paragraph}
-          </p>
-        ))}
+      <div className="animate-fade-up stagger-2">
+        <EpisodeBody body={episode.body} />
       </div>
 
       <footer className="mt-16 pt-8 border-t border-border animate-fade-up stagger-3">
