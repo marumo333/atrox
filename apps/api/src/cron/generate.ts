@@ -6,6 +6,7 @@ import {
   getArcStateByArcId,
   getTopComments,
   getAllEpisodesForArc,
+  getRecentEpisodeIds,
 } from '@atrox/db'
 import { arcState, episodes, agentQueue } from '@atrox/db/schema'
 import {
@@ -94,8 +95,13 @@ async function buildEpisodePrompt(
   stateData: ArcStateData,
   episodeNumber: number,
 ): Promise<string> {
-  const recentComments = await getTopComments(db, [], 5)
   const previousEpisodes = await getAllEpisodesForArc(db, arcId)
+
+  // Collect reader comments from the last 3 episodes (if any).
+  // Empty array on episode 1 → getTopComments short-circuits to [].
+  const recentEpisodeIds = await getRecentEpisodeIds(db, arcId, 3)
+  const recentComments = await getTopComments(db, recentEpisodeIds, 5)
+
   return buildPrompt({
     character,
     arcState: stateData,

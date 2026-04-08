@@ -1,4 +1,4 @@
-import { eq, and, lte, asc } from 'drizzle-orm'
+import { eq, and, lte, asc, desc } from 'drizzle-orm'
 import type { DbClient } from '../client'
 import { episodes } from '../schema/index'
 
@@ -49,4 +49,22 @@ export async function getAllEpisodesForArc(db: DbClient, arcId: string) {
     .from(episodes)
     .where(eq(episodes.arcId, arcId))
     .orderBy(asc(episodes.episodeNumber))
+}
+
+/**
+ * Returns IDs of the most recent N episodes for an arc, newest first.
+ * Used to fetch reader comments on recent episodes for prompt injection.
+ */
+export async function getRecentEpisodeIds(
+  db: DbClient,
+  arcId: string,
+  limit: number,
+): Promise<string[]> {
+  const rows = await db
+    .select({ id: episodes.id })
+    .from(episodes)
+    .where(eq(episodes.arcId, arcId))
+    .orderBy(desc(episodes.episodeNumber))
+    .limit(limit)
+  return rows.map((r) => r.id)
 }

@@ -1,7 +1,7 @@
 # CLAUDE.md — Atrox プロジェクト
 
 > Claude Codeがこのコードベースで作業する際の指示書。
-> プロダクトの全仕様はdocs/PRD.mdを先に読むこと。
+> 参照: `docs/PRD.md`（製品仕様）/ `docs/ROADMAP.md`（実装戦略）/ `docs/SKILLS.md`（スキル）
 
 ---
 

@@ -2,6 +2,7 @@ export {
   getPublishedEpisodes,
   getEpisodeByNumber,
   getAllEpisodesForArc,
+  getRecentEpisodeIds,
 } from './episodes'
 export { getTopComments } from './comments'
 export { getArcStateByArcId } from './arc-state'
