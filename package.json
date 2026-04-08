@@ -9,9 +9,9 @@
     "lint": "turbo lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "db:generate": "pnpm --filter @atrox/db drizzle-kit generate",
-    "db:migrate": "pnpm --filter @atrox/db drizzle-kit migrate",
-    "db:studio": "pnpm --filter @atrox/db drizzle-kit studio"
+    "db:generate": "pnpm --filter @atrox/db db:generate",
+    "db:migrate": "pnpm --filter @atrox/db db:migrate",
+    "db:studio": "pnpm --filter @atrox/db db:studio"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
