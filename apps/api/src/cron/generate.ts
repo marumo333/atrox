@@ -6,7 +6,7 @@ import {
   getArcStateByArcId,
   getTopComments,
 } from '@atrox/db'
-import { arcState, episodes } from '@atrox/db/schema'
+import { arcState, episodes, agentQueue } from '@atrox/db/schema'
 import {
   buildPrompt,
   generateEpisodeText,
@@ -30,13 +30,12 @@ export async function runGenerationJob(
   db: DbClient,
   getCharacter: GetCharacter,
 ): Promise<{ generated: boolean }> {
+  // getPendingJob atomically claims the job by marking it as 'running'
   const job = await getPendingJob(db)
   if (!job) return { generated: false }
 
-  const jobId = (job as { id: string }).id
-  const arcId = (job as { arcId: string }).arcId
-
-  await updateJobStatus(db, jobId, 'running')
+  const jobId = job.id
+  const arcId = job.arcId
 
   try {
     const episodeBody = await generateEpisode(db, arcId, getCharacter)
@@ -107,11 +106,19 @@ async function finalizeJobSuccess(
   arcId: string,
   _episodeBody: string,
 ): Promise<void> {
-  await db.transaction(async (tx) => {
-    const txDb = tx as unknown as DbClient
-    await updateJobStatus(txDb, jobId, 'done')
-    await enqueueNextJob(txDb, arcId, nextMonday())
-  })
+  // Neon HTTP has no transactions — use db.batch for atomic multi-statement
+  await db.batch([
+    db
+      .update(agentQueue)
+      .set({ status: 'done', completedAt: new Date() })
+      .where(eq(agentQueue.id, jobId)),
+    db.insert(agentQueue).values({
+      arcId,
+      trigger: 'cron_weekly',
+      status: 'pending',
+      scheduledAt: nextMonday(),
+    }),
+  ])
 }
 
 function toArcStateData(state: Record<string, unknown>): ArcStateData {
@@ -131,16 +138,16 @@ async function saveEpisodeAndUpdateState(
   episodeNumber: number,
   current: ArcStateData,
 ): Promise<void> {
-  await db.transaction(async (tx) => {
-    await tx.insert(episodes).values({
+  // Neon HTTP has no transactions — use db.batch for atomic multi-statement
+  await db.batch([
+    db.insert(episodes).values({
       arcId,
       episodeNumber,
       body,
       tier: 'pro',
       publishedAt: new Date(),
-    })
-
-    await tx
+    }),
+    db
       .update(arcState)
       .set({
         episodeCount: episodeNumber,
@@ -150,6 +157,6 @@ async function saveEpisodeAndUpdateState(
         emotionalLog: appendEmotionalNote(current.emotionalLog),
         updatedAt: new Date(),
       })
-      .where(eq(arcState.arcId, arcId))
-  })
+      .where(eq(arcState.arcId, arcId)),
+  ])
 }

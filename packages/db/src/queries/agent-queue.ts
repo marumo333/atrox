@@ -1,18 +1,28 @@
-import { eq, sql } from 'drizzle-orm'
+import { eq, and, sql } from 'drizzle-orm'
 import type { DbClient } from '../client'
 import { agentQueue } from '../schema/index'
 import type { QueueStatus } from '@atrox/types'
 
+/**
+ * Atomically claims a pending job by updating one pending row to 'running'
+ * and returning it. Uses UPDATE ... WHERE id = (SELECT ... LIMIT 1) pattern
+ * which is atomic even without session-level locking — suitable for Neon
+ * HTTP driver. The updateJobStatus('running') call in runGenerationJob
+ * becomes a no-op after this.
+ */
 export async function getPendingJob(db: DbClient) {
-  const result = await db.execute(
-    sql`SELECT * FROM agent_queue
-        WHERE status = 'pending'
-        LIMIT 1
-        FOR UPDATE SKIP LOCKED`,
-  )
+  const [job] = await db
+    .update(agentQueue)
+    .set({ status: 'running', startedAt: new Date() })
+    .where(
+      and(
+        eq(agentQueue.status, 'pending'),
+        sql`id = (SELECT id FROM agent_queue WHERE status = 'pending' ORDER BY scheduled_at ASC LIMIT 1)`,
+      ),
+    )
+    .returning()
 
-  const row = result.rows[0]
-  return row ?? null
+  return job ?? null
 }
 
 export async function updateJobStatus(
