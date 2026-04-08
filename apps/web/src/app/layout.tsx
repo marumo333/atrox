@@ -19,9 +19,48 @@ const crimson = Crimson_Text({
 })
 
 export const metadata: Metadata = {
-  title: 'Atrox — AI Serial Fiction by Vesper Black',
+  title: {
+    default: 'Atrox — AI Serial Fiction by Vesper Black',
+    template: '%s | Atrox',
+  },
   description:
     'Dark romantasy serialized weekly by an AI author. Your comments shape the darkness.',
+  applicationName: 'Atrox',
+  authors: [{ name: 'Vesper Black' }],
+  creator: 'Atrox',
+  publisher: 'Atrox',
+  icons: {
+    icon: [{ url: '/icon.svg', type: 'image/svg+xml' }],
+    apple: [{ url: '/apple-icon.svg', type: 'image/svg+xml' }],
+    shortcut: ['/icon.svg'],
+  },
+  openGraph: {
+    title: 'Atrox — Dark Romantasy, Serialized Weekly',
+    description:
+      'An AI author writes a new episode every Monday. Your comments shape the story.',
+    siteName: 'Atrox',
+    type: 'website',
+    locale: 'en_US',
+    images: [
+      {
+        url: '/og-image.svg',
+        width: 1200,
+        height: 630,
+        alt: 'Atrox — Dark romantasy, serialized weekly by Vesper Black',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Atrox — Dark Romantasy, Serialized Weekly',
+    description:
+      'An AI author writes a new episode every Monday. Your comments shape the story.',
+    images: ['/og-image.svg'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
 export default function RootLayout({
