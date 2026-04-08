@@ -1,6 +1,29 @@
 import NextAuth from 'next-auth'
+import 'next-auth/jwt'
 import Credentials from 'next-auth/providers/credentials'
 import { authConfig } from './auth-config'
+
+// Type augmentations for NextAuth — extend session user and JWT with our fields
+declare module 'next-auth' {
+  interface Session {
+    user: {
+      id: string
+      email: string
+      tier: string
+    }
+  }
+
+  interface User {
+    tier: string
+  }
+}
+
+declare module 'next-auth/jwt' {
+  interface JWT {
+    userId: string
+    tier: string
+  }
+}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,

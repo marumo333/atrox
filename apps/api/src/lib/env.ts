@@ -22,6 +22,12 @@ const REQUIRED_VARS = [
 
 let _env: ApiEnv | null = null
 
+/**
+ * Type-safe accessor for ALL required environment variables.
+ * Validates every var at first call and caches the result.
+ * Use this in production code. For tests that only need one
+ * variable, use requireEnv() instead.
+ */
 export function getEnv(): ApiEnv {
   if (_env) return _env
 
@@ -37,4 +43,15 @@ export function getEnv(): ApiEnv {
 
   _env = result
   return _env
+}
+
+/**
+ * Read a single env var with a presence check. Does not cache.
+ * Prefer this in middleware that only needs one variable so tests
+ * can mutate process.env without setting every other required var.
+ */
+export function requireEnv(key: keyof ApiEnv): string {
+  const value = process.env[key]
+  if (!value) throw new Error(`${key} is not set`)
+  return value
 }

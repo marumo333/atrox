@@ -1,15 +1,11 @@
 import { createMiddleware } from 'hono/factory'
 import { timingSafeEqual } from 'node:crypto'
+import { requireEnv } from '../lib/env'
 
 export const cronAuth = () =>
   createMiddleware(async (c, next) => {
-    const secret = process.env.CRON_SECRET
-    if (!secret) {
-      return c.json({ error: 'Internal server error' }, 500)
-    }
-
+    const expected = `Bearer ${requireEnv('CRON_SECRET')}`
     const auth = c.req.header('authorization') ?? ''
-    const expected = `Bearer ${secret}`
 
     if (!safeCompare(auth, expected)) {
       return c.json({ error: 'Unauthorized' }, 401)

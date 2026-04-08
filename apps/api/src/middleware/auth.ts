@@ -1,10 +1,9 @@
 import { createMiddleware } from 'hono/factory'
 import { jwtVerify } from 'jose'
+import { requireEnv } from '../lib/env'
 
 function getSecret(): Uint8Array {
-  const secret = process.env.AUTH_SECRET
-  if (!secret) throw new Error('AUTH_SECRET が設定されていません')
-  return new TextEncoder().encode(secret)
+  return new TextEncoder().encode(requireEnv('AUTH_SECRET'))
 }
 
 interface TokenPayload {

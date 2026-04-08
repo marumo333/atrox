@@ -54,31 +54,51 @@ async function generateEpisode(
   arcId: string,
   getCharacter: GetCharacter,
 ): Promise<string> {
-  const state = await getArcStateByArcId(db, arcId)
-  if (!state) throw new Error(`No arc_state for arc ${arcId}`)
-
+  const stateData = await loadArcState(db, arcId)
   const character = await getCharacter(arcId)
-  const stateData = toArcStateData(state)
-  const recentComments = await getTopComments(db, [], 5)
+  const episodeNumber = stateData.episodeCount + 1
 
-  const prompt = buildPrompt({
+  const prompt = await buildEpisodePrompt(
+    db,
     character,
-    arcState: stateData,
-    topComments: recentComments.map((c) => ({ body: c.body })),
-    episodeNumber: stateData.episodeCount + 1,
-  })
-
+    stateData,
+    episodeNumber,
+  )
   const episodeBody = await generateEpisodeText(prompt)
 
   await saveEpisodeAndUpdateState(
     db,
     arcId,
     episodeBody,
-    stateData.episodeCount + 1,
+    episodeNumber,
     stateData,
   )
 
   return episodeBody
+}
+
+async function loadArcState(
+  db: DbClient,
+  arcId: string,
+): Promise<ArcStateData> {
+  const state = await getArcStateByArcId(db, arcId)
+  if (!state) throw new Error(`No arc_state for arc ${arcId}`)
+  return toArcStateData(state)
+}
+
+async function buildEpisodePrompt(
+  db: DbClient,
+  character: CharacterInfo,
+  stateData: ArcStateData,
+  episodeNumber: number,
+): Promise<string> {
+  const recentComments = await getTopComments(db, [], 5)
+  return buildPrompt({
+    character,
+    arcState: stateData,
+    topComments: recentComments.map((c) => ({ body: c.body })),
+    episodeNumber,
+  })
 }
 
 async function finalizeJobSuccess(
