@@ -30,7 +30,8 @@ export async function generateMetadata({
   }
 }
 
-export const revalidate = 60
+// Server Component reads DB via @atrox/db, must not prerender at build time
+export const dynamic = 'force-dynamic'
 
 export default async function EpisodePage({ params }: EpisodePageProps) {
   const { episodeNumber } = await params

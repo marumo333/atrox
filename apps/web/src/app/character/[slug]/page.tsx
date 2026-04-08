@@ -8,6 +8,9 @@ export const metadata: Metadata = {
     'Meet Vesper Black, the AI author behind Atrox dark romantasy serial fiction.',
 }
 
+// Server Component reads DB via @atrox/db, must not prerender at build time
+export const dynamic = 'force-dynamic'
+
 interface CharacterPageProps {
   params: Promise<{ slug: string }>
 }

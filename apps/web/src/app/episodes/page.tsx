@@ -17,7 +17,8 @@ export const metadata: Metadata = {
     'Read all serialized episodes by Vesper Black. New episode every Monday.',
 }
 
-export const revalidate = 60
+// Server Component reads DB via @atrox/db, must not prerender at build time
+export const dynamic = 'force-dynamic'
 
 export default async function EpisodesPage() {
   const character = await getCharacterBySlug(db, 'vesper-black')
