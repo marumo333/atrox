@@ -22,6 +22,12 @@ export async function findUserByEmail(
   return user ?? null
 }
 
+export async function findUserById(id: string): Promise<UserRecord | null> {
+  const [user] = await db.select().from(users).where(eq(users.id, id)).limit(1)
+
+  return user ?? null
+}
+
 export async function createUser(
   email: string,
   password: string,

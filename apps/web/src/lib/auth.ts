@@ -55,10 +55,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   callbacks: {
     ...authConfig.callbacks,
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.userId = user.id ?? ''
         token.tier = (user as { tier: string }).tier
+      }
+      // On explicit session.update() (e.g. after Lemon Squeezy checkout
+      // redirect), re-read tier from DB so the JWT reflects the latest
+      // subscription state without forcing the user to sign out.
+      if (trigger === 'update' && token.userId) {
+        const { findUserById } = await import('./user-service')
+        const { refreshTokenTier } = await import('./refresh-token-tier')
+        await refreshTokenTier(token, findUserById)
       }
       return token
     },
