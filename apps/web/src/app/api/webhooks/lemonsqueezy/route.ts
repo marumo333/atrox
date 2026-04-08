@@ -1,10 +1,11 @@
-import { Hono } from 'hono'
 import crypto from 'node:crypto'
-import { db } from '@atrox/db'
-import { users } from '@atrox/db/schema'
+import { NextResponse } from 'next/server'
 import { eq } from 'drizzle-orm'
-import { getEnv } from '../lib/env'
-import { variantToTier, isEntitled } from '../lib/tier-mapping'
+import { db, schema } from '@atrox/db'
+import { getLemonWebhookSecret } from '@/lib/env-api'
+import { variantToTier, isEntitled } from '@/lib/lemon-tier'
+
+export const runtime = 'nodejs'
 
 interface LemonPayload {
   meta: { event_name: string; custom_data?: { user_id?: string } }
@@ -20,23 +21,22 @@ interface LemonPayload {
 }
 
 function verifySignature(rawBody: string, signature: string): boolean {
-  const secret = getEnv().LEMONSQUEEZY_WEBHOOK_SECRET
-  const hmac = crypto.createHmac('sha256', secret)
+  const hmac = crypto.createHmac('sha256', getLemonWebhookSecret())
   const digest = Buffer.from(hmac.update(rawBody).digest('hex'), 'utf8')
   const sig = Buffer.from(signature, 'utf8')
   if (digest.length !== sig.length) return false
   return crypto.timingSafeEqual(digest, sig)
 }
 
-export const webhooksRouter = new Hono()
+export async function POST(req: Request) {
+  const signature = req.headers.get('x-signature')
+  if (!signature) {
+    return NextResponse.json({ error: 'Missing signature' }, { status: 400 })
+  }
 
-webhooksRouter.post('/lemonsqueezy', async (c) => {
-  const signature = c.req.header('x-signature')
-  if (!signature) return c.json({ error: 'Missing signature' }, 400)
-
-  const rawBody = await c.req.text()
+  const rawBody = await req.text()
   if (!verifySignature(rawBody, signature)) {
-    return c.json({ error: 'Invalid signature' }, 400)
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
   }
 
   const payload = JSON.parse(rawBody) as LemonPayload
@@ -45,43 +45,43 @@ webhooksRouter.post('/lemonsqueezy', async (c) => {
   const customerId = String(attrs.customer_id)
   const userId = payload.meta.custom_data?.user_id
 
+  const resolveTier = () =>
+    isEntitled(attrs.status, attrs.ends_at)
+      ? variantToTier(attrs.variant_id)
+      : 'free'
+
   switch (event) {
     case 'subscription_created':
     case 'subscription_updated':
     case 'subscription_resumed': {
-      const tier = isEntitled(attrs.status, attrs.ends_at)
-        ? variantToTier(attrs.variant_id)
-        : 'free'
-
+      const tier = resolveTier()
       if (userId) {
         await db
-          .update(users)
+          .update(schema.users)
           .set({
             tier,
             lemonCustomerId: customerId,
             subscribedAt: new Date(),
           })
-          .where(eq(users.id, userId))
+          .where(eq(schema.users.id, userId))
       } else {
         await db
-          .update(users)
+          .update(schema.users)
           .set({ tier, subscribedAt: new Date() })
-          .where(eq(users.lemonCustomerId, customerId))
+          .where(eq(schema.users.lemonCustomerId, customerId))
       }
       break
     }
     case 'subscription_expired':
     case 'subscription_cancelled': {
-      const tier = isEntitled(attrs.status, attrs.ends_at)
-        ? variantToTier(attrs.variant_id)
-        : 'free'
+      const tier = resolveTier()
       await db
-        .update(users)
+        .update(schema.users)
         .set({ tier })
-        .where(eq(users.lemonCustomerId, customerId))
+        .where(eq(schema.users.lemonCustomerId, customerId))
       break
     }
   }
 
-  return c.json({ received: true })
-})
+  return NextResponse.json({ received: true })
+}

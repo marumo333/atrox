@@ -13,6 +13,7 @@
     "@atrox/agent": "workspace:*",
     "@atrox/db": "workspace:*",
     "@atrox/types": "workspace:*",
+    "@lemonsqueezy/lemonsqueezy.js": "^4.0.0",
     "@neondatabase/serverless": "^0.10.0",
     "bcryptjs": "^3.0.3",
     "drizzle-orm": "^0.38.0",
