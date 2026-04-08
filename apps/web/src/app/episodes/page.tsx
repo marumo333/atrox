@@ -8,6 +8,7 @@ import {
   getEffectiveTier,
 } from '@atrox/db'
 import { getCurrentTier } from '@/lib/current-tier'
+import { UpgradeHandler } from '@/components/upgrade-handler'
 import { TIER_ORDER } from '@atrox/types'
 import type { Tier } from '@atrox/types'
 
@@ -43,6 +44,7 @@ export default async function EpisodesPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-20">
+      <UpgradeHandler />
       <header className="mb-14 animate-fade-up">
         <p className="text-xs uppercase tracking-[0.3em] text-gold-muted mb-3">
           Arc {arc.arcNumber} — {arc.title}

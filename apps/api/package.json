@@ -7,7 +7,7 @@
     "build": "tsc --noEmit",
     "lint": "eslint src/",
     "test": "echo 'no tests — apps/api is CLI-scripts only'",
-    "generate:first-episode": "tsx src/scripts/generate-first-episode.ts",
+    "generate:episode": "tsx src/scripts/generate-next-episode.ts",
     "read:episode": "tsx src/scripts/read-episode.ts",
     "fix:episodes": "tsx src/scripts/fix-existing-episodes.ts"
   },
