@@ -139,13 +139,91 @@ const { data, error } = await createCheckout(
       custom: { user_id: userId }, // webhookの meta.custom_data で受け取る
     },
     productOptions: {
-      redirectUrl: `${process.env.NEXT_PUBLIC_URL}/dashboard?upgraded=true`,
+      redirectUrl: `${process.env.NEXT_PUBLIC_URL}/episodes?upgraded=true`,
       receiptButtonText: 'Return to Atrox',
     },
   }
 )
 
 return c.json({ url: data?.data.attributes.url })
+```
+
+`redirectUrl` の末尾に `?upgraded=true` を必ず付与する。この flag を `UpgradeHandler` クライアントコンポーネントが検知して session を自動更新する。
+
+---
+
+## Session自動更新フロー（決済後のUX）
+
+Lemon Squeezy の webhook が非同期で届くため、決済直後の redirect 時点では JWT の tier がまだ 'free' のままの可能性がある。このまま `/episodes` に飛ばすと Pro コンテンツが読めない。
+
+### 解決: pollTierUpdate + JWT refresh
+
+**1. UpgradeHandler (client component)**
+`/episodes` にマウント。`?upgraded=true` を検知したら `pollTierUpdate` を起動。
+
+```tsx
+// apps/web/src/components/upgrade-handler.tsx
+'use client'
+import { useSession } from 'next-auth/react'
+import { pollTierUpdate } from '@/lib/poll-tier-update'
+
+export function UpgradeHandler() {
+  const params = useSearchParams()
+  const { data: session, update } = useSession()
+
+  useEffect(() => {
+    if (params.get('upgraded') !== 'true') return
+    void pollTierUpdate({
+      update: () => update(),
+      getCurrentTier: () => session?.user?.tier,
+      sleep: (ms) => new Promise((r) => setTimeout(r, ms)),
+      maxAttempts: 4,
+      intervalMs: 1500,
+    }).finally(() => router.replace('/episodes'))
+  }, [...])
+  return null
+}
+```
+
+**2. pollTierUpdate (pure logic)**
+最大 4 回 × 1.5秒 = 6 秒ウインドウで session.update() をリトライ。
+
+**3. jwt callback (server)**
+NextAuth v5 の `trigger === 'update'` を検知して DB から最新 tier を再読込。
+
+```ts
+// apps/web/src/lib/auth.ts
+callbacks: {
+  async jwt({ token, user, trigger }) {
+    if (user) {
+      token.userId = user.id ?? ''
+      token.tier = user.tier
+    }
+    if (trigger === 'update' && token.userId) {
+      const { findUserById } = await import('./user-service')
+      const { refreshTokenTier } = await import('./refresh-token-tier')
+      await refreshTokenTier(token, findUserById)
+    }
+    return token
+  }
+}
+```
+
+動的 import を使うのは Edge middleware から DB コードを分離するため。
+
+**4. refreshTokenTier (pure logic)**
+fetchUser callback を受け取ってテスト可能:
+
+```ts
+export async function refreshTokenTier<T extends MutableTokenWithTier>(
+  token: T,
+  fetchUser: (id: string) => Promise<FreshUser | null>,
+): Promise<T> {
+  if (!token.userId) return token
+  const fresh = await fetchUser(token.userId)
+  if (fresh) token.tier = fresh.tier
+  return token
+}
 ```
 
 ---
