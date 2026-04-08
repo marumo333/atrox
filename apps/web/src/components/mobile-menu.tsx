@@ -61,26 +61,34 @@ export function MobileMenu() {
       </button>
 
       {open && (
-        <div className="md:hidden fixed inset-0 top-[65px] z-30 bg-bg/95 backdrop-blur-md animate-fade-in">
-          <nav className="flex flex-col items-center pt-16 gap-8">
+        <div className="md:hidden fixed inset-0 top-[65px] z-30 bg-bg animate-fade-in overflow-y-auto">
+          <nav className="flex flex-col items-stretch px-6 pt-12 pb-12">
             {NAV_LINKS.map((link, i) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setOpen(false)}
-                className={`animate-fade-up stagger-${i + 1} font-display text-2xl tracking-wide text-fg-muted hover:text-gold transition-colors`}
+                className={`animate-fade-up stagger-${i + 1} font-display text-3xl tracking-wide text-fg hover:text-gold border-b border-border py-6 transition-colors`}
               >
                 {link.label}
               </Link>
             ))}
-            <div className="animate-fade-up stagger-4 mt-4">
+            <div className="animate-fade-up stagger-4 mt-10 flex justify-center">
               <AuthButton />
             </div>
-            <div className="animate-fade-up stagger-5 mt-8 flex gap-6 text-xs text-fg-muted/60 tracking-widest">
-              <Link href="/terms" onClick={() => setOpen(false)}>
+            <div className="animate-fade-up stagger-5 mt-12 flex justify-center gap-8 text-xs text-fg-muted tracking-widest uppercase">
+              <Link
+                href="/terms"
+                onClick={() => setOpen(false)}
+                className="hover:text-fg transition-colors"
+              >
                 Terms
               </Link>
-              <Link href="/privacy" onClick={() => setOpen(false)}>
+              <Link
+                href="/privacy"
+                onClick={() => setOpen(false)}
+                className="hover:text-fg transition-colors"
+              >
                 Privacy
               </Link>
             </div>
