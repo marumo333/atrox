@@ -1,11 +1,9 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { secureHeaders } from 'hono/secure-headers'
-import { episodesRouter } from './routes/episodes'
 import { commentsRouter } from './routes/comments'
 import { billingRouter } from './routes/billing'
 import { webhooksRouter } from './routes/webhooks'
-import { charactersRouter } from './routes/characters'
 
 export const app = new Hono()
 
@@ -21,8 +19,8 @@ app.use('*', secureHeaders())
 
 app.get('/health', (c) => c.json({ status: 'ok' }))
 
-app.route('/episodes', episodesRouter)
+// Read-only data (episodes, characters) is served directly from Next.js
+// Server Components via @atrox/db. This API handles mutations only.
 app.route('/comments', commentsRouter)
 app.route('/billing', billingRouter)
 app.route('/webhooks', webhooksRouter)
-app.route('/characters', charactersRouter)

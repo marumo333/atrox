@@ -11,7 +11,8 @@
     "format:check": "prettier --check .",
     "db:generate": "pnpm --filter @atrox/db db:generate",
     "db:migrate": "pnpm --filter @atrox/db db:migrate",
-    "db:studio": "pnpm --filter @atrox/db db:studio"
+    "db:studio": "pnpm --filter @atrox/db db:studio",
+    "db:seed": "pnpm --filter @atrox/db db:seed"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
