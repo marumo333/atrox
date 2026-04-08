@@ -1,0 +1,26 @@
+{
+  "name": "@atrox/api",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "lint": "eslint src/",
+    "test": "echo 'no tests — apps/api is CLI-scripts only'",
+    "generate:first-episode": "tsx src/scripts/generate-first-episode.ts",
+    "read:episode": "tsx src/scripts/read-episode.ts",
+    "fix:episodes": "tsx src/scripts/fix-existing-episodes.ts"
+  },
+  "dependencies": {
+    "@atrox/agent": "workspace:*",
+    "@atrox/db": "workspace:*",
+    "@atrox/types": "workspace:*",
+    "@neondatabase/serverless": "^0.10.0",
+    "drizzle-orm": "^0.38.0"
+  },
+  "devDependencies": {
+    "dotenv": "^17.4.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}
