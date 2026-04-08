@@ -5,6 +5,7 @@ import {
   enqueueNextJob,
   getArcStateByArcId,
   getTopComments,
+  getAllEpisodesForArc,
 } from '@atrox/db'
 import { arcState, episodes, agentQueue } from '@atrox/db/schema'
 import {
@@ -59,6 +60,7 @@ async function generateEpisode(
 
   const prompt = await buildEpisodePrompt(
     db,
+    arcId,
     character,
     stateData,
     episodeNumber,
@@ -87,14 +89,17 @@ async function loadArcState(
 
 async function buildEpisodePrompt(
   db: DbClient,
+  arcId: string,
   character: CharacterInfo,
   stateData: ArcStateData,
   episodeNumber: number,
 ): Promise<string> {
   const recentComments = await getTopComments(db, [], 5)
+  const previousEpisodes = await getAllEpisodesForArc(db, arcId)
   return buildPrompt({
     character,
     arcState: stateData,
+    previousEpisodes,
     topComments: recentComments.map((c) => ({ body: c.body })),
     episodeNumber,
   })

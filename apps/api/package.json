@@ -8,7 +8,8 @@
     "build": "tsc",
     "lint": "eslint src/",
     "test": "vitest run",
-    "generate:first-episode": "tsx src/scripts/generate-first-episode.ts"
+    "generate:first-episode": "tsx src/scripts/generate-first-episode.ts",
+    "read:episode": "tsx src/scripts/read-episode.ts"
   },
   "dependencies": {
     "@atrox/agent": "workspace:*",

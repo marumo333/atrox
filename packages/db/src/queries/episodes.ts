@@ -33,3 +33,20 @@ export async function getEpisodeByNumber(
 
   return episode ?? null
 }
+
+/**
+ * Returns all episodes for an arc (regardless of publish state),
+ * ordered ascending. Used by the generation pipeline to feed prior
+ * episodes into the Claude prompt for continuity.
+ */
+export async function getAllEpisodesForArc(db: DbClient, arcId: string) {
+  return db
+    .select({
+      episodeNumber: episodes.episodeNumber,
+      title: episodes.title,
+      body: episodes.body,
+    })
+    .from(episodes)
+    .where(eq(episodes.arcId, arcId))
+    .orderBy(asc(episodes.episodeNumber))
+}

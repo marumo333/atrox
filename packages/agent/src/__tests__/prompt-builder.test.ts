@@ -27,6 +27,18 @@ const mockInput: PromptInput = {
     ],
     episodeCount: 3,
   },
+  previousEpisodes: [
+    {
+      episodeNumber: 1,
+      title: 'The Invitation',
+      body: 'The letter arrived at dusk.',
+    },
+    {
+      episodeNumber: 2,
+      title: null,
+      body: 'She burned it anyway.',
+    },
+  ],
   topComments: [{ body: 'More tension please' }],
   episodeNumber: 4,
 }
@@ -42,6 +54,20 @@ describe('buildPrompt', () => {
     const prompt = buildPrompt(mockInput)
     const sections = prompt.split('---')
     expect(sections[1]).toContain('No exclamation marks.')
+  })
+
+  it('includes previous episodes before reader comments', () => {
+    const prompt = buildPrompt(mockInput)
+    expect(prompt).toContain('The letter arrived at dusk.')
+    const prevIdx = prompt.indexOf('Previous Episodes')
+    const commentsIdx = prompt.indexOf('Reader Input')
+    expect(prevIdx).toBeGreaterThan(-1)
+    expect(prevIdx).toBeLessThan(commentsIdx)
+  })
+
+  it('shows empty marker when no previous episodes', () => {
+    const prompt = buildPrompt({ ...mockInput, previousEpisodes: [] })
+    expect(prompt).toContain('(none — this is the first episode')
   })
 
   it('includes reader comments near the end', () => {

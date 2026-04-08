@@ -62,12 +62,19 @@ export interface InputSnapshot {
 }
 
 // ── Prompt Builder ──
+export interface PreviousEpisode {
+  episodeNumber: number
+  title: string | null
+  body: string
+}
+
 export interface PromptInput {
   character: {
     personaPrompt: string
     styleRules: string
   }
   arcState: ArcStateData
+  previousEpisodes: PreviousEpisode[]
   topComments: { body: string }[]
   episodeNumber: number
 }
