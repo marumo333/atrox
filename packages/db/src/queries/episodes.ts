@@ -1,31 +1,19 @@
-import { eq, and, lte, asc, inArray } from 'drizzle-orm'
+import { eq, and, lte, asc } from 'drizzle-orm'
 import type { DbClient } from '../client'
 import { episodes } from '../schema/index'
-import type { Tier } from '@atrox/types'
-import { TIER_ORDER } from '@atrox/types'
 
-function getAllowedTiers(userTier: Tier): string[] {
-  const level = TIER_ORDER[userTier]
-  return Object.entries(TIER_ORDER)
-    .filter(([, v]) => v <= level)
-    .map(([k]) => k)
-}
-
-export async function getPublishedEpisodes(
-  db: DbClient,
-  arcId: string,
-  userTier: Tier = 'free',
-) {
-  const allowed = getAllowedTiers(userTier)
+/**
+ * Returns all published episodes for an arc, ordered ascending.
+ * Tier filtering is applied in JS by the caller using getEffectiveTier,
+ * since early-access windows depend on wall-clock time and cannot be
+ * easily expressed with a simple SQL IN clause.
+ */
+export async function getPublishedEpisodes(db: DbClient, arcId: string) {
   return db
     .select()
     .from(episodes)
     .where(
-      and(
-        eq(episodes.arcId, arcId),
-        lte(episodes.publishedAt, new Date()),
-        inArray(episodes.tier, allowed),
-      ),
+      and(eq(episodes.arcId, arcId), lte(episodes.publishedAt, new Date())),
     )
     .orderBy(asc(episodes.episodeNumber))
 }

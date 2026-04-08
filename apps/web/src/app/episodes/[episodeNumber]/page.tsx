@@ -5,10 +5,10 @@ import {
   getCharacterBySlug,
   getActiveArc,
   getEpisodeByNumber,
+  getEffectiveTier,
 } from '@atrox/db'
 import { getCurrentTier } from '@/lib/current-tier'
 import { TIER_ORDER } from '@atrox/types'
-import type { Tier } from '@atrox/types'
 
 interface EpisodePageProps {
   params: Promise<{ episodeNumber: string }>
@@ -40,10 +40,11 @@ export default async function EpisodePage({ params }: EpisodePageProps) {
   const episode = await getEpisodeByNumber(db, arc.id, num)
   if (!episode) notFound()
 
-  // Tier gate — redirect to pricing if user lacks access
-  const tier = await getCurrentTier()
-  if (TIER_ORDER[tier] < TIER_ORDER[episode.tier as Tier]) {
-    redirect('/pricing?required=' + episode.tier)
+  // Tier gate — uses effective tier (respects 3-day early access window)
+  const userTier = await getCurrentTier()
+  const required = getEffectiveTier(episode)
+  if (TIER_ORDER[userTier] < TIER_ORDER[required]) {
+    redirect('/pricing?required=' + required)
   }
 
   return (

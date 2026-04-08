@@ -5,8 +5,11 @@ import {
   getCharacterBySlug,
   getActiveArc,
   getPublishedEpisodes,
+  getEffectiveTier,
 } from '@atrox/db'
 import { getCurrentTier } from '@/lib/current-tier'
+import { TIER_ORDER } from '@atrox/types'
+import type { Tier } from '@atrox/types'
 
 export const metadata: Metadata = {
   title: 'Episodes — Atrox',
@@ -14,7 +17,6 @@ export const metadata: Metadata = {
     'Read all serialized episodes by Vesper Black. New episode every Monday.',
 }
 
-// Always fetch fresh data — episodes list changes weekly
 export const revalidate = 60
 
 export default async function EpisodesPage() {
@@ -28,8 +30,15 @@ export default async function EpisodesPage() {
     return <EmptyState message="No active arc. Check back soon." />
   }
 
-  const tier = await getCurrentTier()
-  const episodes = await getPublishedEpisodes(db, arc.id, tier)
+  const userTier = await getCurrentTier()
+  const allEpisodes = await getPublishedEpisodes(db, arc.id)
+  const userLevel = TIER_ORDER[userTier]
+
+  // Filter by effective tier (respects 3-day early access window)
+  const visible = allEpisodes.filter((ep) => {
+    const effective = getEffectiveTier(ep)
+    return userLevel >= TIER_ORDER[effective]
+  })
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-20">
@@ -43,11 +52,11 @@ export default async function EpisodesPage() {
         </p>
       </header>
 
-      {episodes.length === 0 ? (
+      {visible.length === 0 ? (
         <EmptyState message="The first episode arrives soon." />
       ) : (
         <ul className="space-y-1">
-          {episodes.map((ep, i) => (
+          {visible.map((ep, i) => (
             <li
               key={ep.id}
               className={`animate-fade-up stagger-${Math.min(i + 1, 5)}`}
@@ -55,7 +64,7 @@ export default async function EpisodesPage() {
               <EpisodeRow
                 episodeNumber={ep.episodeNumber}
                 title={ep.title ?? 'Untitled'}
-                tier={ep.tier}
+                effectiveTier={getEffectiveTier(ep)}
                 publishedAt={ep.publishedAt}
               />
             </li>
@@ -69,12 +78,12 @@ export default async function EpisodesPage() {
 function EpisodeRow({
   episodeNumber,
   title,
-  tier,
+  effectiveTier,
   publishedAt,
 }: {
   episodeNumber: number
   title: string
-  tier: string
+  effectiveTier: Tier
   publishedAt: Date | null
 }) {
   return (
@@ -89,9 +98,9 @@ function EpisodeRow({
         <h2 className="font-display text-lg group-hover:text-gold transition-colors">
           {title}
         </h2>
-        {tier === 'pro' && (
+        {effectiveTier === 'pro' && (
           <span className="text-[10px] uppercase tracking-widest text-accent border border-accent/30 px-1.5 py-0.5">
-            Pro
+            Early
           </span>
         )}
       </div>
