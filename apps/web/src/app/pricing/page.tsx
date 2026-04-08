@@ -4,7 +4,7 @@ import Link from 'next/link'
 export const metadata: Metadata = {
   title: 'Pricing — Atrox',
   description:
-    'Free, Pro ($8/mo), and Premium ($24/mo) tiers. Support the story, shape the darkness.',
+    'Free or Pro ($8/mo). Early access to new episodes, story requests, and more.',
 }
 
 const TIERS = [
@@ -33,25 +33,11 @@ const TIERS = [
     cta: 'Upgrade to Pro',
     href: '/login',
   },
-  {
-    name: 'Premium',
-    price: '$24',
-    accent: false,
-    features: [
-      'Everything in Pro',
-      'Create your own character',
-      'Private weekly episodes',
-      'Style and genre customization',
-      'Persistent character memory',
-    ],
-    cta: 'Go Premium',
-    href: '/login',
-  },
 ] as const
 
 export default function PricingPage() {
   return (
-    <div className="mx-auto max-w-4xl px-6 py-20">
+    <div className="mx-auto max-w-3xl px-6 py-20">
       <header className="text-center mb-16 animate-fade-up">
         <p className="text-xs uppercase tracking-[0.3em] text-gold-muted mb-3">
           Subscribe
@@ -62,11 +48,16 @@ export default function PricingPage() {
         <p className="mt-3 text-fg-muted">Shape the darkness.</p>
       </header>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2">
         {TIERS.map((tier, i) => (
           <TierCard key={tier.name} tier={tier} index={i} />
         ))}
       </div>
+
+      <p className="mt-12 text-center text-xs text-fg-muted/60 tracking-wider">
+        More tiers (custom characters, private episodes) arriving in a future
+        update.
+      </p>
     </div>
   )
 }

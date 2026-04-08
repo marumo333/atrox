@@ -21,17 +21,14 @@ billingRouter.use('*', auth())
 billingRouter.post('/checkout', async (c) => {
   const { tier } = await c.req.json<{ tier: string }>()
 
-  if (tier !== 'pro' && tier !== 'premium') {
+  // MVP: only Pro is purchasable. Premium is reserved for a future release.
+  if (tier !== 'pro') {
     return c.json({ error: 'Invalid tier' }, 400)
   }
 
   ensureSetup()
   const env = getEnv()
-  const variantId =
-    tier === 'premium'
-      ? env.LEMONSQUEEZY_VARIANT_PREMIUM
-      : env.LEMONSQUEEZY_VARIANT_PRO
-
+  const variantId = env.LEMONSQUEEZY_VARIANT_PRO
   const userId = c.get('userId' as never) as string
 
   const { data, error } = await createCheckout(

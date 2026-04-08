@@ -6,10 +6,11 @@ export const billingAndConductSections: LegalSection[] = [
     body: (
       <>
         <p>
-          Pro ($8/mo) and Premium ($24/mo) subscriptions are processed by{' '}
+          Pro subscriptions ($8/mo) are processed by{' '}
           <strong className="text-fg">Lemon Squeezy</strong>, a Merchant of
           Record that handles payment, tax, and invoicing globally.
-          Subscriptions auto-renew until cancelled.
+          Subscriptions auto-renew until cancelled. Additional tiers may be
+          introduced in the future.
         </p>
         <p>
           <strong className="text-fg">
