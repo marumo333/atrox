@@ -1,8 +1,13 @@
+'use client'
+
 import Link from 'next/link'
+import { useState } from 'react'
 import { AuthButton } from './auth-button'
-import { MobileMenu } from './mobile-menu'
+import { HamburgerButton, MobileMenuSection } from './mobile-menu'
 
 export function SiteHeader() {
+  const [menuOpen, setMenuOpen] = useState(false)
+
   return (
     <header className="border-b border-border backdrop-blur-sm bg-bg/80 sticky top-0 z-40">
       <nav className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5">
@@ -37,8 +42,14 @@ export function SiteHeader() {
         </div>
 
         {/* Mobile hamburger */}
-        <MobileMenu />
+        <HamburgerButton
+          open={menuOpen}
+          onToggle={() => setMenuOpen(!menuOpen)}
+        />
       </nav>
+
+      {/* Mobile menu section — below the nav, inside sticky header */}
+      <MobileMenuSection open={menuOpen} onClose={() => setMenuOpen(false)} />
     </header>
   )
 }
