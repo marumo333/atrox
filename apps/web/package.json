@@ -10,6 +10,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@atrox/agent": "workspace:*",
     "@atrox/db": "workspace:*",
     "@atrox/types": "workspace:*",
     "@neondatabase/serverless": "^0.10.0",

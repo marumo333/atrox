@@ -10,7 +10,6 @@
     "test": "vitest run",
     "generate:first-episode": "tsx src/scripts/generate-first-episode.ts",
     "read:episode": "tsx src/scripts/read-episode.ts",
-    "debug:episodes": "tsx src/scripts/debug-episodes.ts",
     "fix:episodes": "tsx src/scripts/fix-existing-episodes.ts"
   },
   "dependencies": {

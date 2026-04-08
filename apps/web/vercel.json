@@ -3,7 +3,15 @@
   "functions": {
     "src/app/api/**/route.ts": {
       "maxDuration": 60
+    },
+    "src/app/api/cron/**/route.ts": {
+      "maxDuration": 300
     }
   },
-  "crons": []
+  "crons": [
+    {
+      "path": "/api/cron/generate",
+      "schedule": "0 9 * * 1"
+    }
+  ]
 }

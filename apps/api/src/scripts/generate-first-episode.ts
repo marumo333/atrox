@@ -5,7 +5,7 @@ import { drizzle } from 'drizzle-orm/neon-http'
 import { neon } from '@neondatabase/serverless'
 import { eq } from 'drizzle-orm'
 import * as schema from '@atrox/db/schema'
-import { runGenerationJob } from '../cron/generate'
+import { runGenerationJob } from '@atrox/agent'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 config({ path: resolve(__dirname, '../../../../.env.local') })

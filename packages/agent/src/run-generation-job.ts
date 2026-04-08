@@ -1,26 +1,25 @@
-import type { DbClient } from '@atrox/db'
 import {
   getPendingJob,
   updateJobStatus,
-  enqueueNextJob,
   getArcStateByArcId,
   getTopComments,
   getAllEpisodesForArc,
   getRecentEpisodeIds,
+  schema,
 } from '@atrox/db'
-import { arcState, episodes, agentQueue } from '@atrox/db/schema'
+import type { DbClient } from '@atrox/db'
+import type { ArcStateData, WorldState, RecurringEntities } from '@atrox/types'
+import { eq } from 'drizzle-orm'
+import { buildPrompt } from './prompt-builder'
+import { generateEpisodeText } from './generator'
+import { nextMonday } from './next-monday'
+import { parseEpisode } from './episode-parser'
 import {
-  buildPrompt,
-  generateEpisodeText,
-  nextMonday,
   mergeWorldState,
   extractEntities,
   appendStyleNote,
   appendEmotionalNote,
-  parseEpisode,
-} from '@atrox/agent'
-import type { ArcStateData, WorldState, RecurringEntities } from '@atrox/types'
-import { eq } from 'drizzle-orm'
+} from './state-updater'
 
 interface CharacterInfo {
   personaPrompt: string
@@ -29,11 +28,16 @@ interface CharacterInfo {
 
 type GetCharacter = (arcId: string) => Promise<CharacterInfo>
 
+/**
+ * Claims one pending agent_queue job atomically, generates the next
+ * episode via Claude, and saves it. On success, enqueues the next
+ * week's pending job. On failure, marks the job as failed with the
+ * error message — no auto-retry.
+ */
 export async function runGenerationJob(
   db: DbClient,
   getCharacter: GetCharacter,
 ): Promise<{ generated: boolean }> {
-  // getPendingJob atomically claims the job by marking it as 'running'
   const job = await getPendingJob(db)
   if (!job) return { generated: false }
 
@@ -41,8 +45,8 @@ export async function runGenerationJob(
   const arcId = job.arcId
 
   try {
-    const episodeBody = await generateEpisode(db, arcId, getCharacter)
-    await finalizeJobSuccess(db, jobId, arcId, episodeBody)
+    const rawBody = await generateEpisode(db, arcId, getCharacter)
+    await finalizeJobSuccess(db, jobId, arcId, rawBody)
     return { generated: true }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error'
@@ -67,17 +71,10 @@ async function generateEpisode(
     stateData,
     episodeNumber,
   )
-  const episodeBody = await generateEpisodeText(prompt)
+  const rawBody = await generateEpisodeText(prompt)
 
-  await saveEpisodeAndUpdateState(
-    db,
-    arcId,
-    episodeBody,
-    episodeNumber,
-    stateData,
-  )
-
-  return episodeBody
+  await saveEpisodeAndUpdateState(db, arcId, rawBody, episodeNumber, stateData)
+  return rawBody
 }
 
 async function loadArcState(
@@ -97,9 +94,6 @@ async function buildEpisodePrompt(
   episodeNumber: number,
 ): Promise<string> {
   const previousEpisodes = await getAllEpisodesForArc(db, arcId)
-
-  // Collect reader comments from the last 3 episodes (if any).
-  // Empty array on episode 1 → getTopComments short-circuits to [].
   const recentEpisodeIds = await getRecentEpisodeIds(db, arcId, 3)
   const recentComments = await getTopComments(db, recentEpisodeIds, 5)
 
@@ -116,15 +110,14 @@ async function finalizeJobSuccess(
   db: DbClient,
   jobId: string,
   arcId: string,
-  _episodeBody: string,
+  _rawBody: string,
 ): Promise<void> {
-  // Neon HTTP has no transactions — use db.batch for atomic multi-statement
   await db.batch([
     db
-      .update(agentQueue)
+      .update(schema.agentQueue)
       .set({ status: 'done', completedAt: new Date() })
-      .where(eq(agentQueue.id, jobId)),
-    db.insert(agentQueue).values({
+      .where(eq(schema.agentQueue.id, jobId)),
+    db.insert(schema.agentQueue).values({
       arcId,
       trigger: 'cron_weekly',
       status: 'pending',
@@ -150,12 +143,10 @@ async function saveEpisodeAndUpdateState(
   episodeNumber: number,
   current: ArcStateData,
 ): Promise<void> {
-  // Extract title from Claude output and strip header
   const parsed = parseEpisode(rawBody)
 
-  // Neon HTTP has no transactions — use db.batch for atomic multi-statement
   await db.batch([
-    db.insert(episodes).values({
+    db.insert(schema.episodes).values({
       arcId,
       episodeNumber,
       title: parsed.title,
@@ -164,7 +155,7 @@ async function saveEpisodeAndUpdateState(
       publishedAt: new Date(),
     }),
     db
-      .update(arcState)
+      .update(schema.arcState)
       .set({
         episodeCount: episodeNumber,
         worldState: mergeWorldState(current.worldState, parsed.body),
@@ -176,6 +167,6 @@ async function saveEpisodeAndUpdateState(
         emotionalLog: appendEmotionalNote(current.emotionalLog),
         updatedAt: new Date(),
       })
-      .where(eq(arcState.arcId, arcId)),
+      .where(eq(schema.arcState.arcId, arcId)),
   ])
 }
