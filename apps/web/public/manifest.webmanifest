@@ -1,0 +1,25 @@
+{
+  "name": "Atrox — AI Serial Fiction",
+  "short_name": "Atrox",
+  "description": "Dark romantasy serialized weekly by an AI author. Your comments shape the darkness.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#08080a",
+  "theme_color": "#08080a",
+  "orientation": "portrait",
+  "categories": ["books", "entertainment"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

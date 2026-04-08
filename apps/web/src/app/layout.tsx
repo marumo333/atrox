@@ -34,6 +34,7 @@ export const metadata: Metadata = {
     apple: [{ url: '/apple-icon.svg', type: 'image/svg+xml' }],
     shortcut: ['/icon.svg'],
   },
+  manifest: '/manifest.webmanifest',
   openGraph: {
     title: 'Atrox — Dark Romantasy, Serialized Weekly',
     description:
